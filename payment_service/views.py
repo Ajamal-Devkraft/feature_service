@@ -9,7 +9,7 @@ class ProcessedLeadData(APIView):
     def post(self,request):
         lead_id = request.data.get("lead_id")
         if LeadData.objects.filter(lead_id=lead_id).exists():
-            lead_data = LeadData.objects.get(lead_id=lead_id)
+            lead_data = LeadData.objects.filter(lead_id=lead_id).last()
             status = int(lead_data.status)  + 1
             LeadData.objects.create(lead_id=lead_id, status=status)
         else:
