@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'feature_service.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'feature',
+        'USER': 'postgres',
+        'PASSWORD': '%%0enU:g<lmAiZ.:',
+        'HOST': '35.244.3.135',  # or postgres in Docker
+        'PORT': '5432',
     }
 }
 
