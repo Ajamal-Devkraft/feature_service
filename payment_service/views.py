@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 class ProcessedLeadData(APIView):
 
-    def post(request):
+    def post(self,request):
         lead_id = request.data.get("lead_id")
         status = request.data.get("status")
         lead_data = LeadData.objects.create(lead_id=lead_id, status=status)
