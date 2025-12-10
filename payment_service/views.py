@@ -27,6 +27,7 @@ class ProcessedLeadData(APIView):
                     source=source
                 )
                 return Response({"lead_id": lead_id, "status": 1})
+            last.refresh_from_db()
             status = int(last.status) + 1
             lead = LeadData.objects.create(lead_id=lead_id, status=status, source=source)
         return Response({"lead_id": lead_id,"id":lead.id, "status":status})
