@@ -8,7 +8,7 @@ import redis
 from django.conf import settings
 from contextlib import contextmanager
 
-r = redis.Redis(host='redis', port=6379, db=0)
+# r = redis.Redis(host='redis', port=6379, db=0)
 # Create your views here.
 
 class ProcessedLeadData(APIView):
@@ -18,7 +18,7 @@ class ProcessedLeadData(APIView):
         source = request.data.get("source", 'API')
         # with r.lock(f"lead-{lead_id}", timeout=5):
         with transaction.atomic():
-            last = LeadData.objects.select_for_update(lead_id=lead_id).order_by('-id').first()
+            last = LeadData.objects.filter(lead_id=lead_id) .select_for_update().order_by('-id').first()
             status = 1 if last is None else int(last.status) + 1
             lead = LeadData.objects.create(lead_id=lead_id, status=status, source=source)
         return Response({"lead_id": lead_id,"id":lead.id, "status":status})
