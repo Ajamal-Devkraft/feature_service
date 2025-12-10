@@ -18,18 +18,32 @@ class ProcessedLeadData(APIView):
         source = request.data.get("source", 'API')
         # with r.lock(f"lead-{lead_id}", timeout=5):
         with transaction.atomic():
-            last = LeadData.objects.filter(lead_id=lead_id) .select_for_update().order_by('-id').first()
+            last = LeadData.objects.filter(lead_id=lead_id) .select_for_update(lead_id=lead_id).order_by('-id').first()
             if last is None:
-                # insert first row INSIDE lock
-                lead = LeadData.objects.create(
+                # insert first
+                obj = LeadData.objects.create(
                     lead_id=lead_id,
                     status=1,
                     source=source
                 )
-                return Response({"lead_id": lead_id, "status": 1})
-            last.refresh_from_db()
-            status = int(last.status) + 1
-            lead = LeadData.objects.create(lead_id=lead_id, status=status, source=source)
+                # AFTER insert, re-read inside same lock
+                last = (
+                    LeadData.objects
+                    .filter(lead_id=lead_id)
+                    .select_for_update()
+                    .order_by('-id')
+                    .first()
+                )
+                status = last.status   # it could be 1 or more now
+
+            else:
+                status = last.status + 1
+                lead = LeadData.objects.create(
+                    lead_id=lead_id,
+                    status=status,
+                    source=source
+                )
+            # lead = LeadData.objects.create(lead_id=lead_id, status=status, source=source)
         return Response({"lead_id": lead_id,"id":lead.id, "status":status})
 
 
