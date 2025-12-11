@@ -18,7 +18,7 @@ class ProcessedLeadData(APIView):
         source = request.data.get("source", 'API')
         # with r.lock(f"lead-{lead_id}", timeout=5):
         with transaction.atomic():
-            last = LeadData.objects.filter(lead_id=lead_id).select_for_update()
+            last = LeadData.objects.select_for_update().filter(lead_id=lead_id)
             last_record = last.order_by('-id').first()
             status = int(last_record.status) + 1 if last_record else 1
             lead = LeadData.objects.create(lead_id=lead_id, status=status, source=source)
