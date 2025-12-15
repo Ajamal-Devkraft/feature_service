@@ -34,7 +34,7 @@ class ProcessedLeadData(APIView):
             if last_record:
                 LeadData.objects.filter(id=last_record.id).update(
                     status=F("status") + 1,
-                    source=F("source") + "," + source
+                    source=source
                 )
                 last_record.refresh_from_db()
                 lead = last_record
