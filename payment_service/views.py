@@ -20,8 +20,8 @@ class ProcessedLeadData(APIView):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT pg_advisory_xact_lock(hashtext(%s))",
-                    [lead_id]
+                    "SELECT pg_advisory_xact_lock(%s)",
+                    [int(lead_id)]
                 )
 
             last_record = (
