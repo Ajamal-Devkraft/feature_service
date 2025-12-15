@@ -21,9 +21,13 @@ class ProcessedLeadData(APIView):
             qs = LeadData.objects.select_for_update().filter(lead_id=lead_id)
             list(qs)
             last_record = qs.order_by('-id').first()
-            status = int(last_record.status) + 1 if last_record else 1
-            lead = LeadData.objects.create(lead_id=lead_id, status=status, source=source)
-        return Response({"lead_id": lead_id,"id":lead.id, "status":status})
+            # status = int(last_record.status) + 1 if last_record else 1
+            # lead = LeadData.objects.create(lead_id=lead_id, status=status, source=source)
+            last_record.status = F('status') + 1
+            last_record.source = source
+            last_record.save()
+            lead = last_record
+        return Response({"lead_id": lead_id,"id":lead.id, "status":last_record.status, "source":last_record.source})
 
 
             
