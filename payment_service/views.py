@@ -26,11 +26,11 @@ class ProcessedLeadData(APIView):
 
             last_record = (
                 LeadData.objects
+                .select_for_update()
                 .filter(lead_id=lead_id)
                 .order_by('-id')
                 .first()
             )
-
             if last_record:
                 LeadData.objects.filter(id=last_record.id).update(
                     status=F("status") + 1,
