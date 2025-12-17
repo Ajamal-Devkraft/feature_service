@@ -16,6 +16,7 @@ class ProcessedLeadData(APIView):
     def post(self,request):
         lead_id = request.data.get("lead_id")
         source = request.data.get("source", 'API')
+        version = request.data.get("version")
         # with r.lock(f"lead-{lead_id}", timeout=5):
         with transaction.atomic():
             with connection.cursor() as cursor:
@@ -32,19 +33,32 @@ class ProcessedLeadData(APIView):
                 .first()
             )
             if last_record:
-                LeadData.objects.filter(id=last_record.id).update(
+                updated = LeadData.objects.filter(id=last_record.id, version=version).update(
                     status=F("status") + 1,
+                    version=F("version") + 1,
                     source=source
                 )
-                last_record.refresh_from_db()
-                lead = last_record
+                if updated == 0:
+                    return Response(
+                        {"error": "State changed, please refresh and retry"},
+                        status=409
+                    )
             else:
                 lead = LeadData.objects.create(
                     lead_id=lead_id,
                     status=1,
-                    source=source
+                    source=source,
+                    version=version
                 )
-        return Response({"lead_id": lead_id,"id":lead.id, "status":lead.status, "source":lead.source})
+        return Response({"lead_id": lead_id})
+    
+    def get(self,request):
+        lead_id = request.query_params.get("lead_id")
+        lead = LeadData.objects.filter(lead_id=lead_id).last()
+        if lead:
+            return Response({"lead_id": lead.lead_id, "status": lead.status, "source": lead.source, "version": lead.version})
+        else:
+            return Response({"error": "Lead not found", "version": 0})
 
 
             
