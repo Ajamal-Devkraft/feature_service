@@ -58,7 +58,7 @@ class ProcessedLeadData(APIView):
         if lead:
             return Response({"lead_id": lead.lead_id, "status": lead.status, "source": lead.source, "version": lead.version})
         else:
-            return Response({"error": "Lead not found", "version": 0})
+            return Response({"error": "Lead not found", "version": 1})
 
 
             
